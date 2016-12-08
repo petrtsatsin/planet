@@ -1,7 +1,10 @@
-#!flask/bin/python
 from flask import Flask, jsonify, abort, make_response
 from flask import request
 import requests
+import os
+from PIL import Image
+from StringIO import StringIO
+import numpy as np
 
 app = Flask(__name__)
 
@@ -18,16 +21,25 @@ images = [
 ]
 
 @app.route('/annotation/api/v1.0/info', methods=['GET'])
-def get_tasks():
-    
-    return jsonify({'info': info})
+def get_tasks(): 
+     return jsonify({'info': info})
 
-#@app.route('/annotation/api/v1.0/tasks/<int:task_id>', methods=['GET'])
-#def get_task(task_id):
-#    task = [task for task in tasks if task['id'] == task_id]
-#    if len(task) == 0:
-#        abort(404)
-#    return jsonify({'task': task[0]})
+caffe_root = '/home/ubuntu/caffe/'  # this file is expected to be in {caffe_root}/examples/caffe-test-mnist-jpg/
+import caffe
+
+if not os.path.isfile(caffe_root + 'examples/mnist/lenet_iter_10000.caffemodel'):
+    print("Cannot find trained caffemodel...")
+
+caffe.set_mode_cpu()
+net = caffe.Net(caffe_root + 'examples/mnist/lenet.prototxt',
+                caffe_root + 'examples/mnist/lenet_iter_10000.caffemodel',
+                caffe.TEST)
+
+net.blobs['data'].reshape(1,1,28,28)
+
+def save_image(r, name):
+    with open(name, 'wb') as f:
+        f.write(r.content)
 
 @app.route('/annotation/api/v1.0/classify', methods=['POST'])
 def create_task():
@@ -41,13 +53,24 @@ def create_task():
     }
     images.append(image)
     r = requests.get(image['url'])
-    with open('test_file.png', 'wb') as f:
-        f.write(r.content)
+    save_image(r,"test_image2.jpg")
+    img = Image.open(StringIO(r.content))
+    arr = np.array(img)  
+    if (arr.shape[0] != 28 or arr.shape[1] != 28):
+        abort(400)
     return jsonify({'image': image}), 201
+
+@app.route('/annotation/api/v1.0/images')
+def hello(name=None):
+    return render_template('images.html')
 
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
+
+@app.errorhandler(400)
+def not_found(error):
+    return make_response(jsonify({'error': 'Bad request'}), 400)
 
 if __name__ == '__main__':
     app.run(debug=True)
