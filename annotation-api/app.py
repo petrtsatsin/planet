@@ -55,9 +55,18 @@ def create_task():
     r = requests.get(image['url'])
     save_image(r,"test_image2.jpg")
     img = Image.open(StringIO(r.content))
-    arr = np.array(img)  
-    if (arr.shape[0] != 28 or arr.shape[1] != 28):
+    arr = np.array(img) 
+    print arr.shape 
+    tmp=arr[:,:,0]
+    if (tmp.shape[0] != 28 or tmp.shape[1] != 28):
         abort(400)
+    else:
+        #temp=tmp.reshape(1,1,28,28)
+        net.blobs['data'].data[...] =tmp;
+        out = net.forward()
+        print("Predicted class is #{}.".format(out['prob'].argmax()))
+        image['done'] = True
+        image['label'] = out['prob'].argmax()
     return jsonify({'image': image}), 201
 
 @app.route('/annotation/api/v1.0/images')
