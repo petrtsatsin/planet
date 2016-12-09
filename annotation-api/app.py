@@ -20,22 +20,23 @@ images = [
 
 ]
 
+def initialize_caffe():
+    caffe_root = '/home/ubuntu/caffe/'  # this file is expected to be in {caffe_root}/examples/caffe-test-mnist-jpg/
+    import caffe
+    if not os.path.isfile(caffe_root + 'examples/mnist/lenet_iter_10000.caffemodel'):
+        print("Cannot find trained caffemodel...")
+    caffe.set_mode_cpu()
+    net = caffe.Net(caffe_root + 'examples/mnist/lenet.prototxt',
+                caffe_root + 'examples/mnist/lenet_iter_10000.caffemodel',
+                caffe.TEST)
+    net.blobs['data'].reshape(1,1,28,28)
+    return net
+
+net = initialize_caffe()
+
 @app.route('/annotation/api/v1.0/info', methods=['GET'])
 def get_tasks(): 
      return jsonify({'info': info})
-
-caffe_root = '/home/ubuntu/caffe/'  # this file is expected to be in {caffe_root}/examples/caffe-test-mnist-jpg/
-import caffe
-
-if not os.path.isfile(caffe_root + 'examples/mnist/lenet_iter_10000.caffemodel'):
-    print("Cannot find trained caffemodel...")
-
-caffe.set_mode_cpu()
-net = caffe.Net(caffe_root + 'examples/mnist/lenet.prototxt',
-                caffe_root + 'examples/mnist/lenet_iter_10000.caffemodel',
-                caffe.TEST)
-
-net.blobs['data'].reshape(1,1,28,28)
 
 def save_image(r, name):
     with open(name, 'wb') as f:
