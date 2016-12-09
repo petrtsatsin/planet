@@ -31,7 +31,7 @@ Just create a EC2 machine from this ami. It will work on free tier micro instanc
 ssh to your ec2 machine
 cd to /ubuntu/planet/annotation-api
 export FLASK_APP=app
-fask run
+flask run
 ```
 Queries are same as before.
 
