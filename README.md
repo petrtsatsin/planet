@@ -40,3 +40,5 @@ Just query:
 ```{r, engine='bash', count_lines}
 curl -i -H "Content-Type: application/json" -X POST -d '{"url":"https://s3.amazonaws.com/petrtsatsin/mnist/test.png"}' ec2-54-161-187-164.compute-1.amazonaws.com:9001/annotation/api/v1.0/classify
 ```
+###Any Questions:
+Ping me at ptsatsin@gmail.com
