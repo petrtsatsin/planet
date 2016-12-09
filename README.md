@@ -25,7 +25,7 @@ curl -i -H "Content-Type: application/json" -X POST -d '{"url":"https://s3.amazo
 curl -i -H "Content-Type: application/json" GET http://localhost:5000/annotation/api/v1.0/info
 ```
 
-If you don't want to install anithing I provide public am 'ami-d16e6ec6' with everything preinstalled and latest version of the app.
+If you don't want to install anithing I provide public am `ami-d16e6ec6` with everything preinstalled and latest version of the app.
 Just create a EC2 machine from this ami. It will work on free tier micro instances.
 ```{r, engine='bash', count_lines}
 ssh to your ec2 machine
