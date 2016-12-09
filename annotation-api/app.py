@@ -52,21 +52,25 @@ def create_task():
         'model': 'mnist_v1'
     }
     images.append(image)
-    r = requests.get(image['url'])
-    save_image(r,"test_image2.jpg")
-    img = Image.open(StringIO(r.content))
-    arr = np.array(img) 
-    print arr.shape 
-    tmp=arr[:,:,0]
-    if (tmp.shape[0] != 28 or tmp.shape[1] != 28):
-        abort(400)
-    else:
+    try:
+        r = requests.get(image['url'])
+        save_image(r,"test_image2.jpg")
+        img = Image.open(StringIO(r.content))
+        arr = np.array(img) 
+        print arr.shape 
+        tmp=arr[:,:,0]
+        if (tmp.shape[0] != 28 or tmp.shape[1] != 28):
+            abort(400)
+        else:
         #temp=tmp.reshape(1,1,28,28)
-        net.blobs['data'].data[...] =tmp;
-        out = net.forward()
-        print("Predicted class is #{}.".format(out['prob'].argmax()))
-        image['done'] = True
-        image['label'] = out['prob'].argmax()
+            net.blobs['data'].data[...] =tmp;
+            out = net.forward()
+            print("Predicted class is #{}.".format(out['prob'].argmax()))
+            image['done'] = True
+            image['label'] = out['prob'].argmax()
+    except IOError as e:  # This is the correct syntax
+        print e
+        abort(400)
     return jsonify({'image': image}), 201
 
 @app.route('/annotation/api/v1.0/images')
@@ -82,4 +86,4 @@ def not_found(error):
     return make_response(jsonify({'error': 'Bad request'}), 400)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=9001)
